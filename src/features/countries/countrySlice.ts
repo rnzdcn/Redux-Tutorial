@@ -35,6 +35,10 @@ const initialState: InitialState = {
 }
 
 export const fetchCountries = createAsyncThunk('countries/fetch', async () => {
+  if (!import.meta.env.VITE_FAKE_SERVER_URL) {
+    throw new Error('VITE_FAKE_SERVER_URL is not defined');
+  }
+
   try {
     const response = await axios.get(`${import.meta.env.VITE_FAKE_SERVER_URL}/countriesArray`)
     return response.data as Array<Country>
