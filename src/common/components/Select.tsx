@@ -1,10 +1,11 @@
-import * as React from 'react'
 import Box from '@mui/material/Box'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { Country, State } from '../types'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../app/store/store.ts'
 
 interface BasicSelectProps {
   type: string
@@ -23,27 +24,26 @@ export default function BasicSelect(
     handleOnStateChange,
   }: BasicSelectProps) {
 
-  const [ country, setCountry ] = React.useState<Country | null>(null)
-  const [ state, setState ] = React.useState<State | null>(null)
-
-  React.useEffect(() => {
-    if (type === 'country') {
-      if (!handleOnCountryChange) return
-      handleOnCountryChange(country)
-    } else {
-      if (!handleOnStateChange) return
-      handleOnStateChange(state)
-    }
-
-  }, [ country, state, type ])
+  const location = useSelector((state: RootState) => state.countries.selectLocation)
 
   const handleChange = (event: SelectChangeEvent) => {
     const selectedLocation = menuItems.find(item => item.name === event.target.value)
-
     if (type === 'country') {
-      setCountry(selectedLocation as Country | null)
+      if (!handleOnCountryChange) return
+      handleOnCountryChange(selectedLocation as Country)
     } else {
-      setState(selectedLocation as State | null)
+      if (!handleOnStateChange) return
+      handleOnStateChange(selectedLocation as State)
+    }
+  }
+
+  function selectValue() {
+    if (type === 'country' && location.country) {
+      return location.country.name
+    } else if (type === 'state' && location.state) {
+      return location.state.name
+    } else {
+      return ''
     }
   }
 
@@ -54,7 +54,7 @@ export default function BasicSelect(
         <Select
           labelId="select-label"
           id="select"
-          value={(type === 'country' && country) ? country.name : state ? state.name : ''}
+          value={selectValue()}
           label="selectedLocation"
           onChange={handleChange}
         >
